@@ -16,7 +16,7 @@
   ],
   "type": "module",
   "scripts": {
-    "dev": "bunx --bun vite",
+    "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "format": "prettier --write './src/**/*.{html,js,jsx,ts,tsx}'"
