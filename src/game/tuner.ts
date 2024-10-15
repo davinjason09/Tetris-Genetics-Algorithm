@@ -1,21 +1,3 @@
-type Candidate = {
-  heightWeight: number;
-  linesWeight: number;
-  holesWeight: number;
-  bumpinessWeight: number;
-  fitness: number;
-};
-
-type TunerConfig = {
-  populationSize: number;
-  mutationRate: number;
-  crossoverRate: number;
-};
-
-type TrainConfig = {
-  gamesPerCandidate: number;
-  maxMovesPerGame: number;
-};
 
 class Tuner {
   candidates: Candidate[];
