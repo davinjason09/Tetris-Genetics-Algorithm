@@ -1,4 +1,4 @@
-class Grid {
+export class Grid {
   rows: number;
   columns: number;
   cells: number[][];
@@ -33,6 +33,19 @@ class Grid {
     }
 
     return linesCleared;
+  }
+
+  addPiece(piece: Piece): void {
+    for (let row = 0; row < piece.cells.length; row++) {
+      for (let column = 0; column < piece.cells[row].length; column++) {
+        const _row = piece.y + row;
+        const _column = piece.x + column;
+
+        if (piece.cells[row][column] !== 0 && _row >= 0) {
+          this.cells[_row][_column] = piece.cells[row][column];
+        }
+      }
+    }
   }
 
   // Helper functions
