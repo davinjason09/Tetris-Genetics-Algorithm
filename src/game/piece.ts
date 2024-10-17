@@ -1,4 +1,6 @@
-class Piece {
+import { Grid } from "./grid";
+
+export class Piece {
   cells: number[][];
   dimension: number;
   row: number;
@@ -82,7 +84,7 @@ class Piece {
     return piece;
   }
 
-  canMoveLeft(grid: { cells: number[][]; rows: number }): boolean {
+  canMoveLeft(grid: Grid): boolean {
     for (let r = 0; r < this.cells.length; r++) {
       for (let c = 0; c < this.cells[r].length; c++) {
         const _r = this.row + r;
@@ -97,7 +99,7 @@ class Piece {
     return true;
   }
 
-  canMoveRight(grid: { cells: number[][]; rows: number }): boolean {
+  canMoveRight(grid: Grid): boolean {
     for (let r = 0; r < this.cells.length; r++) {
       for (let c = 0; c < this.cells[r].length; c++) {
         const _r = this.row + r;
@@ -112,7 +114,7 @@ class Piece {
     return true;
   }
 
-  canMoveDown(grid: { cells: number[][]; rows: number }): boolean {
+  canMoveDown(grid: Grid): boolean {
     for (let r = 0; r < this.cells.length; r++) {
       for (let c = 0; c < this.cells[r].length; c++) {
         const _r = this.row + r + 1;
@@ -127,7 +129,7 @@ class Piece {
     return true;
   }
 
-  moveLeft(grid: { cells: number[][]; rows: number }): boolean {
+  moveLeft(grid: Grid): boolean {
     if (!this.canMoveLeft(grid)) {
       return false;
     }
@@ -135,7 +137,7 @@ class Piece {
     return true;
   }
 
-  moveRight(grid: { cells: number[][]; rows: number }): boolean {
+  moveRight(grid: Grid): boolean {
     if (!this.canMoveRight(grid)) {
       return false;
     }
@@ -143,7 +145,7 @@ class Piece {
     return true;
   }
 
-  moveDown(grid: { cells: number[][]; rows: number }): boolean {
+  moveDown(grid: Grid): boolean {
     if (!this.canMoveDown(grid)) {
       return false;
     }
