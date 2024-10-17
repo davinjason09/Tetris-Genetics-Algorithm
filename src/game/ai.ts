@@ -5,7 +5,7 @@ interface Weights {
   bumpinessWeight: number;
 }
 
-class AI {
+export class AI {
   heightWeight: number;
   linesWeight: number;
   holesWeight: number;
@@ -41,10 +41,10 @@ class AI {
 
         let score: number | null = null;
         if (workingPieceIndex === (workingPieces.length - 1)) {
-          score = -this.heightWeight * _grid.aggregateHeight() +
-                  this.linesWeight * _grid.lines() -
-                  this.holesWeight * _grid.holes() -
-                  this.bumpinessWeight * _grid.bumpiness();
+          score = this.heightWeight * _grid.aggregateHeight() +
+            this.linesWeight * _grid.lines() +
+            this.holesWeight * _grid.holes() +
+            this.bumpinessWeight * _grid.bumpiness();
         } else {
           score = this._best(_grid, workingPieces, workingPieceIndex + 1).score;
         }
