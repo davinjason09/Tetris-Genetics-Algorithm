@@ -198,7 +198,7 @@ export class Piece {
     this.cells = _cells;
   }
 
-  computeRotateOffset(grid: { valid: (piece: Piece) => boolean }): { rowOffset: number; columnOffset: number } | null {
+  computeRotateOffset(grid: Grid): { rowOffset: number; columnOffset: number } | null {
     const _piece = this.clone();
     _piece.rotateCells();
     if (grid.valid(_piece)) {
@@ -236,7 +236,7 @@ export class Piece {
     return null;
   }
 
-  rotate(grid: { valid: (piece: Piece) => boolean }): boolean {
+  rotate(grid: Grid): boolean {
     const offset = this.computeRotateOffset(grid);
     if (offset) {
       this.row += offset.rowOffset;
