@@ -1,3 +1,7 @@
+import { AI } from './ai';
+import { Grid } from './grid';
+import { RandomPieceGenerator } from './piece_generator';
+import { TunerConfig, TrainConfig, Candidate } from './../constant/Types';
 
 class Tuner {
   candidates: Candidate[];
@@ -44,13 +48,13 @@ class Tuner {
   computeFitness(
     candidates: Candidate[],
     trainConfig: TrainConfig
-  ) {
+  ): void {
     candidates.forEach(candidate => {
       const ai = new AI(candidate);
       let totalScore = 0;
 
       for (let i = 0; i < trainConfig.gamesPerCandidate; i++) {
-        const grid = new Grid(22, 10);
+        const grid: Grid = new Grid(22, 10);
         const rng = new RandomPieceGenerator();
         const workingPieces = [rng.nextPiece(), rng.nextPiece()];
         let currentPiece = workingPieces[0];
