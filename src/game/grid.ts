@@ -1,3 +1,5 @@
+import { Piece } from './piece';
+
 export class Grid {
   rows: number;
   columns: number;
@@ -38,14 +40,31 @@ export class Grid {
   addPiece(piece: Piece): void {
     for (let row = 0; row < piece.cells.length; row++) {
       for (let column = 0; column < piece.cells[row].length; column++) {
-        const _row = piece.y + row;
-        const _column = piece.x + column;
+        const _row = piece.row + row;
+        const _column = piece.column + column;
 
         if (piece.cells[row][column] !== 0 && _row >= 0) {
           this.cells[_row][_column] = piece.cells[row][column];
         }
       }
     }
+  }
+
+  valid(piece: Piece): boolean {
+    for (let row = 0; row < piece.cells.length; row++) {
+      for (let col = 0; col < piece.cells[row].length; col++) {
+        const _row = piece.row + row;
+        const _col = piece.column + col;
+
+        if (piece.cells[row][col] != 0) {
+          if (_row < 0 || _row >= this.rows) return false;
+          if (_col < 0 || _col >= this.columns) return false;
+          if (this.cells[_row][_col] != 0) return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   // Helper functions
