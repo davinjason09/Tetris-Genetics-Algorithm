@@ -166,7 +166,7 @@ export class Tuner {
       for (let i = 0; i < Math.floor(this.config.populationSize * 0.3); i++) {
         const [parent1, parent2] = this.tournamentSelection(this.candidates, Math.floor(this.config.populationSize * 0.1));
         const child = this.crossover(parent1, parent2);
-        if (Math.random() < 0.05) {
+        if (Math.random() < this.config.mutationRate) {
           this.mutate(child);
         }
         this.normalize(child);
