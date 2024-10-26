@@ -1,3 +1,6 @@
+import { Grid } from './grid';
+import { Piece } from './piece';
+
 interface Weights {
   heightWeight: number;
   linesWeight: number;
@@ -36,20 +39,20 @@ export class AI {
         const _pieceSet = _piece.clone();
         while (_pieceSet.moveDown(grid));
 
-        const _grid = grid.clone();
+        const _grid = grid.cloneGrid();
         _grid.addPiece(_pieceSet);
 
         let score: number | null = null;
         if (workingPieceIndex === (workingPieces.length - 1)) {
-          score = this.heightWeight * _grid.aggregateHeight() +
-            this.linesWeight * _grid.lines() +
-            this.holesWeight * _grid.holes() +
-            this.bumpinessWeight * _grid.bumpiness();
+          score = this.heightWeight * _grid.calculateAggregateHeight() +
+            this.linesWeight * _grid.calculateCompleteLines() +
+            this.holesWeight * _grid.calculateHoles() +
+            this.bumpinessWeight * _grid.calculateHoles();
         } else {
           score = this._best(_grid, workingPieces, workingPieceIndex + 1).score;
         }
 
-        if (score > bestScore || bestScore === null) {
+        if (score! > bestScore! || bestScore === null) {
           bestScore = score;
           best = _piece.clone();
         }
