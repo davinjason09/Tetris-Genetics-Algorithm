@@ -5,8 +5,8 @@ export class RandomPieceGenerator {
   private index: number;
 
   constructor() {
-    this.shuffleBag();
     this.bag = [0, 1, 2, 3, 4, 5, 6];
+    this.shuffleBag();
     this.index = -1;
   }
 
