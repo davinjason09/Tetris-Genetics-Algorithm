@@ -52,6 +52,10 @@ export class Game {
     this.startTurn();
   }
 
+  private intToRGB(i: number): string {
+    return `rgb(${(i >> 16) & 0xFF}, ${(i >> 8) & 0xFF}, ${i & 0xFF})`;
+  }
+
   private redrawGridCanvas(workingPiecesVerticalOffset: number = 0): void {
     this.gridContext.save();
     this.gridContext.clearRect(0, 0, this.gridCanvas.width, this.gridCanvas.height);
@@ -59,7 +63,7 @@ export class Game {
     for (let row = 2; row < this.grid.rows; row++) {
       for (let col = 0; col < this.grid.columns; col++) {
         if (this.grid.cells[row][col] !== 0) {
-          this.gridContext.fillStyle = this.grid.cells[row][col];
+          this.gridContext.fillStyle = this.intToRGB(this.grid.cells[row][col]);
           this.gridContext.fillRect(20 * col, 20 * (row - 2), 20, 20);
           this.gridContext.strokeStyle = '#FFFFFF';
           this.gridContext.strokeRect(20 * col, 20 * (row - 2), 20, 20);
@@ -71,10 +75,10 @@ export class Game {
       for (let row = 0; row < this.workingPiece.dimension; row++) {
         for (let col = 0; col < this.workingPiece.dimension; col++) {
           if (this.grid.cells[row][col] !== 0) {
-            this.gridContext.fillStyle = this.grid.cells[row][col];
-            this.gridContext.fillRect(20 * (col + this.workingPiece.dimension), 20 * ((row + this.workingPiece.dimension) - 2), 20, 20);
+            this.gridContext.fillStyle = this.intToRGB(this.grid.cells[row][col]);
+            this.gridContext.fillRect(20 * (col + this.workingPiece.dimension), 20 * ((row + this.workingPiece.dimension) - 2) + workingPiecesVerticalOffset, 20, 20);
             this.gridContext.strokeStyle = '#FFFFFF';
-            this.gridContext.strokeRect(20 * (col + this.workingPiece.dimension), 20 * ((row + this.workingPiece.dimension) - 2), 20, 20);
+            this.gridContext.strokeRect(20 * (col + this.workingPiece.dimension), 20 * ((row + this.workingPiece.dimension) - 2) + workingPiecesVerticalOffset, 20, 20);
           }
         }
       }
@@ -95,7 +99,7 @@ export class Game {
       for (let r = 0; r < next.dimension; r++) {
         for (let c = 0; c < next.dimension; c++) {
           if (next.cells[r][c] !== 0) {
-            this.nextContext.fillStyle = next.cells[r][c];
+            this.nextContext.fillStyle = this.intToRGB(next.cells[r][c]);
             this.nextContext.fillRect(xOffset! + 20 * c, yOffset! + 20 * r, 20, 20);
             this.nextContext.strokeStyle = "#FFFFFF";
             this.nextContext.strokeRect(xOffset! + 20 * c, yOffset! + 20 * r, 20, 20);
