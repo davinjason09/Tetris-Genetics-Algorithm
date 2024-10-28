@@ -53,11 +53,13 @@ export class Tuner {
     candidates: Candidate[],
     trainConfig: TrainConfig,
   ): void {
-    candidates.forEach(candidate => {
+    candidates.forEach((candidate, idx) => {
       const ai = new AI(candidate);
       let totalScore = 0;
 
-      console.log(`Computing fitness for candidate: ${JSON.stringify(candidate)}`);
+      console.log(
+        `Computing fitness for candidate ${idx}: ${JSON.stringify(candidate, null, 2)}`,
+      );
       for (let i = 0; i < trainConfig.gamesPerCandidate; i++) {
         const grid: Grid = new Grid(22, 10);
         const rng = new RandomPieceGenerator();
@@ -81,7 +83,7 @@ export class Tuner {
         }
 
         totalScore += score;
-        console.log(`Game ${i + 1} score: ${score}`);
+        console.log(`Game ${i + 1} score: ${score}, moves: ${moves}`);
       }
 
       candidate.fitness = totalScore;
@@ -167,10 +169,10 @@ export class Tuner {
       this.candidates.push(this.generateRandomCandidate());
     }
 
-    console.log("Initial candidates:");
-    for (let i = 0; i < this.candidates.length; i++) {
-      console.log(`Candidate ${i}: ${JSON.stringify(this.candidates[i])}`);
-    }
+    //console.log("Initial candidates:");
+    //for (let i = 0; i < this.candidates.length; i++) {
+    //  console.log(`Candidate ${i}: ${JSON.stringify(this.candidates[i])}`);
+    //}
 
     console.log("Computing fitness for initial candidate...");
     this.computeFitness(this.candidates, trainConfig);
@@ -194,16 +196,24 @@ export class Tuner {
         newCandidates.push(child);
       }
 
+      console.log("=".repeat(80));
       console.log(`Computing fitnesses of new candidates. (${count})`);
       this.computeFitness(newCandidates, trainConfig);
       this.deleteNWeakest(this.candidates, newCandidates);
 
-      const totalFitness = this.candidates.reduce((sum, c) => sum + (c.fitness || 0), 0);
+      const totalFitness = this.candidates.reduce(
+        (sum, c) => sum + (c.fitness || 0),
+        0,
+      );
+      console.log("=".repeat(80));
       console.log(`Average fitness = ${totalFitness / this.candidates.length}`);
       console.log(`Highest fitness = ${this.candidates[0].fitness} (${count})`);
-      console.log(`Fittest candidate: ${JSON.stringify(this.candidates[0])} (${count})`);
+      console.log(
+        `Fittest candidate: ${JSON.stringify(this.candidates[0], null, 2)} (${count})`,
+      );
+      console.log("=".repeat(80));
+
       count++;
     }
   }
-
-};
+}
