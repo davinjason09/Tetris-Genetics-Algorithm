@@ -133,21 +133,20 @@ export class Tuner {
     return child;
   }
 
-  private mutate(candidate: Candidate): void {
+  private mutate(candidate: Candidate, chance: number[]): void {
     const quantity = Math.random() * 0.4 - 0.2;
-    switch (this.randomInteger(0, 4)) {
-      case 0:
-        candidate.heightWeight += quantity;
-        break;
-      case 1:
-        candidate.linesWeight += quantity;
-        break;
-      case 2:
-        candidate.holesWeight += quantity;
-        break;
-      case 3:
-        candidate.bumpinessWeight += quantity;
-        break;
+
+    if (chance[0] < this.config.mutationRate) {
+      candidate.heightWeight += quantity;
+    }
+    if (chance[1] < this.config.mutationRate) {
+      candidate.linesWeight += quantity;
+    }
+    if (chance[2] < this.config.mutationRate) {
+      candidate.holesWeight += quantity;
+    }
+    if (chance[3] < this.config.mutationRate) {
+      candidate.bumpinessWeight += quantity;
     }
   }
 
@@ -187,9 +186,10 @@ export class Tuner {
           Math.floor(this.config.populationSize * 0.1),
         );
         const child = this.crossover(parent1, parent2);
-        if (Math.random() < this.config.mutationRate) {
-          this.mutate(child);
-        }
+
+        const mutationChance = Array.from({ length: 4 }, () => Math.random());
+        this.mutate(child, mutationChance);
+
         this.normalize(child);
         newCandidates.push(child);
       }
