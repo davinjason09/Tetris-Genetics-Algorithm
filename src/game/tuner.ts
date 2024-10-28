@@ -1,7 +1,7 @@
-import { AI } from './ai';
-import { Grid } from './grid';
-import { RandomPieceGenerator } from './piece_generator';
-import { TunerConfig, TrainConfig, Candidate } from './../constant/Types';
+import { AI } from "./ai";
+import { Grid } from "./grid";
+import { RandomPieceGenerator } from "./piece_generator";
+import { TunerConfig, TrainConfig, Candidate } from "./../constant/Types";
 
 export class Tuner {
   candidates: Candidate[];
@@ -19,9 +19,9 @@ export class Tuner {
   private normalize(candidate: Candidate): Candidate {
     const norm = Math.sqrt(
       candidate.heightWeight ** 2 +
-      candidate.linesWeight ** 2 +
-      candidate.holesWeight ** 2 +
-      candidate.bumpinessWeight ** 2,
+        candidate.linesWeight ** 2 +
+        candidate.holesWeight ** 2 +
+        candidate.bumpinessWeight ** 2,
     );
 
     candidate.heightWeight /= norm;
@@ -51,7 +51,7 @@ export class Tuner {
 
   private computeFitness(
     candidates: Candidate[],
-    trainConfig: TrainConfig
+    trainConfig: TrainConfig,
   ): void {
     candidates.forEach(candidate => {
       const ai = new AI(candidate);
@@ -66,7 +66,10 @@ export class Tuner {
         let score = 0;
         let moves = 0;
 
-        while ((moves++) < trainConfig.maxMovesPerGame && !grid.hasExceededTop()) {
+        while (
+          moves++ < trainConfig.maxMovesPerGame &&
+          !grid.hasExceededTop()
+        ) {
           currentPiece = ai.best(grid, workingPieces)!;
           while (currentPiece.moveDown(grid));
 
@@ -86,7 +89,10 @@ export class Tuner {
     });
   }
 
-  private tournamentSelection(candidates: Candidate[], k: number): [Candidate, Candidate] {
+  private tournamentSelection(
+    candidates: Candidate[],
+    k: number,
+  ): [Candidate, Candidate] {
     const indices = Array.from(candidates.keys());
 
     let fittestIndex1: number | null = null;
@@ -103,15 +109,23 @@ export class Tuner {
       }
     }
 
-    return [candidates[fittestIndex1!], candidates[fittestIndex2!]]
+    return [candidates[fittestIndex1!], candidates[fittestIndex2!]];
   }
 
   private crossover(parent1: Candidate, parent2: Candidate): Candidate {
     const child = {
-      heightWeight: parent1.fitness! * parent1.heightWeight + parent2.fitness! * parent2.heightWeight,
-      linesWeight: parent1.fitness! * parent1.linesWeight + parent2.fitness! * parent2.linesWeight,
-      holesWeight: parent1.fitness! * parent1.holesWeight + parent2.fitness! * parent2.holesWeight,
-      bumpinessWeight: parent1.fitness! * parent1.bumpinessWeight + parent2.fitness! * parent2.bumpinessWeight,
+      heightWeight:
+        parent1.fitness! * parent1.heightWeight +
+        parent2.fitness! * parent2.heightWeight,
+      linesWeight:
+        parent1.fitness! * parent1.linesWeight +
+        parent2.fitness! * parent2.linesWeight,
+      holesWeight:
+        parent1.fitness! * parent1.holesWeight +
+        parent2.fitness! * parent2.holesWeight,
+      bumpinessWeight:
+        parent1.fitness! * parent1.bumpinessWeight +
+        parent2.fitness! * parent2.bumpinessWeight,
       fitness: 0,
     };
 
@@ -137,8 +151,15 @@ export class Tuner {
     }
   }
 
-  private deleteNWeakest(candidates: Candidate[], newCandidates: Candidate[]): void {
-    candidates.splice(-newCandidates.length, newCandidates.length, ...newCandidates);
+  private deleteNWeakest(
+    candidates: Candidate[],
+    newCandidates: Candidate[],
+  ): void {
+    candidates.splice(
+      -newCandidates.length,
+      newCandidates.length,
+      ...newCandidates,
+    );
     this.sortCandidates(candidates);
   }
 
@@ -153,10 +174,7 @@ export class Tuner {
     }
 
     console.log("Computing fitness for initial candidate...");
-    this.computeFitness(
-      this.candidates,
-      trainConfig
-    );
+    this.computeFitness(this.candidates, trainConfig);
 
     this.sortCandidates(this.candidates);
 
@@ -164,7 +182,10 @@ export class Tuner {
     while (true) {
       const newCandidates: Candidate[] = [];
       for (let i = 0; i < Math.floor(this.config.populationSize * 0.3); i++) {
-        const [parent1, parent2] = this.tournamentSelection(this.candidates, Math.floor(this.config.populationSize * 0.1));
+        const [parent1, parent2] = this.tournamentSelection(
+          this.candidates,
+          Math.floor(this.config.populationSize * 0.1),
+        );
         const child = this.crossover(parent1, parent2);
         if (Math.random() < this.config.mutationRate) {
           this.mutate(child);
