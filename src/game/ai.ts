@@ -1,5 +1,5 @@
-import { Grid } from './grid';
-import { Piece } from './piece';
+import { Grid } from "./grid";
+import { Piece } from "./piece";
 
 interface Weights {
   heightWeight: number;
@@ -21,7 +21,11 @@ export class AI {
     this.bumpinessWeight = weights.bumpinessWeight;
   }
 
-  private _best(grid: Grid, workingPieces: Piece[], workingPieceIndex: number): { piece: Piece | null; score: number | null } {
+  private _best(
+    grid: Grid,
+    workingPieces: Piece[],
+    workingPieceIndex: number,
+  ): { piece: Piece | null; score: number | null } {
     let best: Piece | null = null;
     let bestScore: number | null = null;
     const workingPiece = workingPieces[workingPieceIndex];
