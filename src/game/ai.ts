@@ -47,11 +47,12 @@ export class AI {
         _grid.addPiece(_pieceSet);
 
         let score: number | null = null;
-        if (workingPieceIndex === (workingPieces.length - 1)) {
-          score = this.heightWeight * _grid.calculateAggregateHeight() +
+        if (workingPieceIndex === workingPieces.length - 1) {
+          score =
+            this.heightWeight * _grid.calculateAggregateHeight() +
             this.linesWeight * _grid.calculateCompleteLines() +
             this.holesWeight * _grid.calculateHoles() +
-            this.bumpinessWeight * _grid.calculateHoles();
+            this.bumpinessWeight * _grid.calculateBumpiness();
         } else {
           score = this._best(_grid, workingPieces, workingPieceIndex + 1).score;
         }
