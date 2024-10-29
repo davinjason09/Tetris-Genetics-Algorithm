@@ -115,19 +115,20 @@ export class Tuner {
   }
 
   private crossover(parent1: Candidate, parent2: Candidate): Candidate {
+    const CROSSOVER_BIAS = 1; // prevent multiplicaiton by 0
     const child = {
       heightWeight:
-        parent1.fitness! * parent1.heightWeight +
-        parent2.fitness! * parent2.heightWeight,
+        (parent1.fitness! + CROSSOVER_BIAS) * parent1.heightWeight +
+        (parent2.fitness! + CROSSOVER_BIAS) * parent2.heightWeight,
       linesWeight:
-        parent1.fitness! * parent1.linesWeight +
-        parent2.fitness! * parent2.linesWeight,
+        (parent1.fitness! + CROSSOVER_BIAS) * parent1.linesWeight +
+        (parent2.fitness! + CROSSOVER_BIAS) * parent2.linesWeight,
       holesWeight:
-        parent1.fitness! * parent1.holesWeight +
-        parent2.fitness! * parent2.holesWeight,
+        (parent1.fitness! + CROSSOVER_BIAS) * parent1.holesWeight +
+        (parent2.fitness! + CROSSOVER_BIAS) * parent2.holesWeight,
       bumpinessWeight:
-        parent1.fitness! * parent1.bumpinessWeight +
-        parent2.fitness! * parent2.bumpinessWeight,
+        (parent1.fitness! + CROSSOVER_BIAS) * parent1.bumpinessWeight +
+        (parent2.fitness! + CROSSOVER_BIAS) * parent2.bumpinessWeight,
       fitness: 0,
     };
 
