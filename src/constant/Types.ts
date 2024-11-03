@@ -7,9 +7,11 @@ export type Candidate = {
 };
 
 export type TunerConfig = {
+  generations: number;
   populationSize: number;
   mutationRate: number;
-  crossoverRate: number;
+  mutationStep: number;
+  patience: number;
 };
 
 export type TrainConfig = {
