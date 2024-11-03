@@ -167,6 +167,8 @@ export class Tuner {
   }
 
   public tune(trainConfig: TrainConfig): void {
+    let bestAverageFitness: number = 0;
+
     for (let i = 0; i < this.config.populationSize; i++) {
       this.candidates.push(this.generateRandomCandidate());
     }
@@ -181,8 +183,9 @@ export class Tuner {
 
     this.sortCandidates(this.candidates);
 
-    let count = 0;
-    while (true) {
+    let count: number = 0;
+    let patience: number = 0;
+    while (count < this.config.generations) {
       const newCandidates: Candidate[] = [];
       for (let i = 0; i < Math.floor(this.config.populationSize * 0.3); i++) {
         const [parent1, parent2] = this.tournamentSelection(
@@ -206,15 +209,33 @@ export class Tuner {
         (sum, c) => sum + (c.fitness || 0),
         0,
       );
+      const currentAverageFitness = totalFitness / this.candidates.length;
       console.log("=".repeat(80));
-      console.log(`Average fitness = ${totalFitness / this.candidates.length}`);
+      console.log(`Average fitness = ${currentAverageFitness} (${count})`);
       console.log(`Highest fitness = ${this.candidates[0].fitness} (${count})`);
       console.log(
         `Fittest candidate: ${JSON.stringify(this.candidates[0], null, 2)} (${count})`,
       );
       console.log("=".repeat(80));
 
+      if (currentAverageFitness > bestAverageFitness) {
+        bestAverageFitness = currentAverageFitness;
+        patience = 0;
+      } else {
+        patience++;
+      }
+
+      if (patience > this.config.patience) {
+        break;
+      }
+
       count++;
     }
+
+    console.log("=".repeat(80));
+    console.log("Tuning complete!");
+    console.log(
+      `Best fitness:\n${JSON.stringify(this.candidates[0], null, 2)}`,
+    );
   }
 }
