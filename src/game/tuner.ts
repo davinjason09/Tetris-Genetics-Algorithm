@@ -83,7 +83,7 @@ export class Tuner {
         }
 
         totalScore += score;
-        console.log(`Game ${i + 1} score: ${score}, moves: ${moves}`);
+        console.log(`Game ${i + 1} score: ${score}, moves: ${moves - 1}`);
       }
 
       candidate.fitness = totalScore;
