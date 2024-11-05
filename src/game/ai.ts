@@ -21,55 +21,78 @@ export class AI {
     this.bumpinessWeight = weights.bumpinessWeight;
   }
 
-  private _best(
+  private evaluateGrid(grid: Grid): number {
+    const aggregateHeight = grid.calculateAggregateHeight();
+    const completeLines = grid.calculateCompleteLines();
+    const holes = grid.calculateHoles();
+    const bumpiness = grid.calculateBumpiness();
+
+    return (
+      this.heightWeight * aggregateHeight +
+      this.linesWeight * completeLines +
+      this.holesWeight * holes +
+      this.bumpinessWeight * bumpiness
+    );
+  }
+
+  private findBestPlacement(
     grid: Grid,
     workingPieces: Piece[],
     workingPieceIndex: number,
   ): { piece: Piece | null; score: number | null } {
-    let best: Piece | null = null;
+    if (workingPieceIndex < 0 || workingPieceIndex >= workingPieces.length) {
+      throw new Error("Invalid working piece index");
+    }
+
+    const currentPiece = workingPieces[workingPieceIndex];
+    let bestPiece: Piece | null = null;
     let bestScore: number | null = null;
-    const workingPiece = workingPieces[workingPieceIndex];
 
     for (let rotation = 0; rotation < 4; rotation++) {
-      const _piece = workingPiece.clone();
+      const rotatedPiece = currentPiece.clone();
+
       for (let i = 0; i < rotation; i++) {
-        _piece.rotate(grid);
+        rotatedPiece.rotate(grid);
       }
 
       // Move piece to the leftmost position
-      while (_piece.moveLeft(grid));
+      while (rotatedPiece.moveLeft(grid));
 
-      while (grid.valid(_piece)) {
-        const _pieceSet = _piece.clone();
-        while (_pieceSet.moveDown(grid));
+      while (grid.valid(rotatedPiece)) {
+        const piecePlacement = rotatedPiece.clone();
 
-        const _grid = grid.cloneGrid();
-        _grid.addPiece(_pieceSet);
+        // Move piece down as far as possible
+        while (piecePlacement.moveDown(grid));
+
+        const simulatedGrid = grid.cloneGrid();
+        simulatedGrid.addPiece(piecePlacement);
 
         let score: number | null = null;
         if (workingPieceIndex === workingPieces.length - 1) {
-          score =
-            this.heightWeight * _grid.calculateAggregateHeight() +
-            this.linesWeight * _grid.calculateCompleteLines() +
-            this.holesWeight * _grid.calculateHoles() +
-            this.bumpinessWeight * _grid.calculateBumpiness();
+          score = this.evaluateGrid(simulatedGrid);
         } else {
-          score = this._best(_grid, workingPieces, workingPieceIndex + 1).score;
+          score = this.findBestPlacement(
+            simulatedGrid,
+            workingPieces,
+            workingPieceIndex + 1,
+          ).score;
         }
 
         if (score! > bestScore! || bestScore === null) {
           bestScore = score;
-          best = _piece.clone();
+          bestPiece = rotatedPiece.clone();
         }
 
-        _piece.column++;
+        // Move piece to the right
+        rotatedPiece.column++;
       }
     }
 
-    return { piece: best, score: bestScore };
+    return { piece: bestPiece, score: bestScore };
   }
 
-  best(grid: Grid, workingPieces: Piece[]): Piece | null {
-    return this._best(grid, workingPieces, 0).piece;
+  public bestMove(grid: Grid, workingPieces: Piece[]): Piece | null {
+    const result = this.findBestPlacement(grid, workingPieces, 0);
+    return result.piece;
   }
 }
