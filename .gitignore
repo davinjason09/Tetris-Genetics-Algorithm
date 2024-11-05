@@ -24,3 +24,6 @@ public
 *.njsproj
 *.sln
 *.sw?
+
+# Output
+!src/game/output/*
