@@ -26,4 +26,5 @@ public
 *.sw?
 
 # Output
-!src/game/output/*
+src/game/output/*
+*.txt
