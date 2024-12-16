@@ -3,54 +3,36 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link
+      href="https://fonts.googleapis.com/css?family=JetBrains+Mono"
+      rel="stylesheet"
+      type="text/css"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="/style.css" />
     <title>Vite App</title>
   </head>
 
-  <body
-    class="m-0 flex min-h-screen min-w-[320px] place-items-center bg-[#ffffff] font-inter text-base font-normal text-[#213547] dark:bg-[#242424] dark:text-transparent-white"
-  >
-    <div
-      class="mx-auto flex max-w-[1280px] flex-col items-center justify-center p-8"
-    >
-      <a href="https://vitejs.dev" target="_blank" rel="noopener noreferrer">
-        <img
-          src="./vite.svg"
-          class="h-24 p-5 will-change-[filter] hover:drop-shadow-logo"
-          alt="Vite logo"
-        />
-      </a>
-      <a
-        href="https://tailwindcss.com/"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <img
-          src="./tailwindcss.svg"
-          class="h-18 w-auto p-5 will-change-[filter] hover:drop-shadow-logo-tw"
-          alt="TailwindCSS logo"
-        />
-      </a>
-      <h1
-        class="my-12 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text p-4 text-6xl text-transparent"
-      >
-        Hello Vite!
-      </h1>
-      <div class="card">
-        <button id="counter" type="button"></button>
+  <body>
+    <div class="main">
+      <div id="output" class="text">
+        <h1>Tetris AI</h1>
+        <h5>A genetic algorithm approach</h5>
+        <div id="grid"></div>
       </div>
-      <div class="flex flex-row items-center gap-3 text-gray-600">
-        Built with love by
-        <a
-          href="https://kometo.co/?utm_source=vite-tailwind-nojs-starter"
-          target="_blank"
-          rel="noopener noreferrer"
-          title="KometoLabs"
-          class="shadow-sm"
-          ><img class="inline" src="/img/kometo.png" alt="KometoLabs logo"
-        /></a>
+      <div id="instructions" class="text">
+        <br />
+        <b>[Key Commands]</b>
+        <br />
+        <br />Speed Up: [+] <br />Slow Down: [-] <br />Toggle AI: [A]
+        <br />Reset Game: [R] <br />Pause / Continue: [P] <br />Move Shape:
+        [Arrow Keys] <br />Rotate Shape: [Space] <br />Drop Shape: [Down Arrow]
+      </div>
+      <div id="details" class="text">
+        <div id="score" class="text"></div>
+        <div id="genome" class="text"></div>
       </div>
     </div>
+    <script type="module" src="/game/main.ts"></script>
   </body>
 </html>
