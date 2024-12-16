@@ -1,6 +1,3 @@
 {
-  "tailwindConfig": "./tailwind.config.mjs",
-  "plugins": [
-    "prettier-plugin-tailwindcss"
-  ]
+  "tailwindConfig": "./tailwind.config.mjs"
 }
