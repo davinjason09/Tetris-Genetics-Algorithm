@@ -14,7 +14,16 @@ export type TunerConfig = {
   patience: number;
 };
 
-export type TrainConfig = {
+export type GAConfig = {
+  generations: number;
+  populationSize: number;
+  selectionSize: number;
+  mutationRate: number;
+  mutationStep: number;
+  deletionRate: number;
+};
+
+export type GameConfig = {
   gamesPerCandidate: number;
   maxMovesPerGame: number;
 };
