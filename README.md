@@ -23,13 +23,13 @@ git clone https://github.com/davinjason09/Tetris-Genetics-Algorithm.git
 2. Install the packages
 
 ```bash
-npm install
+$ npm install
 # or
-yarn install
+$ yarn install
 # or
-pnpm install
+$ pnpm install
 # or
-bun install
+$ bun install
 ```
 
 3. After installing the packages, you can run the project by running the following command:
