@@ -1,4 +1,4 @@
-import { Piece } from './piece';
+import { Piece } from "./piece";
 
 export class Grid {
   rows: number;
@@ -12,17 +12,23 @@ export class Grid {
   }
 
   // Grid manipulation
-  cloneGrid(): Grid {
+  public cloneGrid(): Grid {
     const clonedGrid = new Grid(this.rows, this.columns);
     clonedGrid.cells = this.cells.map((row) => row.slice());
     return clonedGrid;
   }
 
-  hasExceededTop(): boolean {
+  public resetGrid(): void {
+    this.cells = Array.from({ length: this.rows }, () =>
+      Array(this.columns).fill(0),
+    );
+  }
+
+  public hasExceededTop(): boolean {
     return !this.isRowEmpty(0) || !this.isRowEmpty(1);
   }
 
-  clearedLines(): number {
+  public clearedLines(): number {
     let linesCleared = 0;
 
     for (let row = this.rows - 1; row >= 0; row--) {
@@ -37,7 +43,7 @@ export class Grid {
     return linesCleared;
   }
 
-  addPiece(piece: Piece): void {
+  public addPiece(piece: Piece): void {
     for (let row = 0; row < piece.cells.length; row++) {
       for (let column = 0; column < piece.cells[row].length; column++) {
         const _row = piece.row + row;
@@ -50,7 +56,20 @@ export class Grid {
     }
   }
 
-  valid(piece: Piece): boolean {
+  public removePiece(piece: Piece): void {
+    for (let row = 0; row < piece.cells.length; row++) {
+      for (let column = 0; column < piece.cells[row].length; column++) {
+        const _row = piece.row + row;
+        const _column = piece.column + column;
+
+        if (piece.cells[row][column] !== 0 && _row >= 0) {
+          this.cells[_row][_column] = 0;
+        }
+      }
+    }
+  }
+
+  public valid(piece: Piece): boolean {
     for (let row = 0; row < piece.cells.length; row++) {
       for (let col = 0; col < piece.cells[row].length; col++) {
         const _row = piece.row + row;
@@ -92,7 +111,7 @@ export class Grid {
   }
 
   // Heuristic
-  calculateAggregateHeight(): number {
+  public calculateAggregateHeight(): number {
     let totalHeight = 0;
 
     for (let column = 0; column < this.columns; column++) {
@@ -102,7 +121,7 @@ export class Grid {
     return totalHeight;
   }
 
-  calculateCompleteLines(): number {
+  public calculateCompleteLines(): number {
     let completeLines = 0;
 
     for (let row = 0; row < this.rows; row++) {
@@ -112,17 +131,17 @@ export class Grid {
     return completeLines;
   }
 
-  calculateBumpiness(): number {
+  public calculateBumpiness(): number {
     let totalBumpiness = 0;
     for (let column = 0; column < this.columns - 1; column++) {
       totalBumpiness += Math.abs(
-        this.getColumnHeight(column) - this.getColumnHeight(column + 1)
+        this.getColumnHeight(column) - this.getColumnHeight(column + 1),
       );
     }
     return totalBumpiness;
   }
 
-  calculateHoles(): number {
+  public calculateHoles(): number {
     let totalHoles = 0;
 
     for (let column = 0; column < this.columns; column++) {
@@ -135,5 +154,4 @@ export class Grid {
 
     return totalHoles;
   }
-
 }
