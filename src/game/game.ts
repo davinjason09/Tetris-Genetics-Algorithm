@@ -1,320 +1,342 @@
+import { colors, gameSpeed, tetrisScore } from "../constant/Contants";
+import { Candidate, GAConfig, GameConfig } from "../constant/Types";
 import { AI } from "./ai";
+import { Genome } from "./genome";
 import { Grid } from "./grid";
 import { Piece } from "./piece";
 import { RandomPieceGenerator } from "./piece_generator";
-import { Stopwatch } from "./stopwatch";
-import { Timer } from "./timer";
 
 export class Game {
-  private gridCanvas: HTMLCanvasElement;
-  private nextCanvas: HTMLCanvasElement;
-  private scoreContainer: HTMLElement;
-  private resetButton: HTMLElement;
-  private aiButton: HTMLElement;
-  private gridContext: CanvasRenderingContext2D;
-  private nextContext: CanvasRenderingContext2D;
-  private grid: Grid;
-  private rng: RandomPieceGenerator;
-  private ai: AI;
-  private workingPieces: (Piece | null)[];
-  private workingPiece: Piece | null;
-  private isAIActive: boolean;
-  private isKeyEnabled: boolean;
-  private gravityTimer: Timer;
-  private score: number;
-  private workingPieceDropAnimationStopwatch: Stopwatch | null;
+  ai: AI;
+  aiActive: boolean;
+  candidates: Candidate[];
+  changeSpeed: boolean;
+  config: GAConfig;
+  currentGenome: number;
+  grid: Grid;
+  gameConfig: GameConfig;
+  gameInterval: ReturnType<typeof setInterval>;
+  gamePlayed: number;
+  generation: number;
+  lines: number;
+  movePlayed: number;
+  movingPiece: Piece;
+  togglePause: boolean;
+  pieces: Piece[];
+  rng: RandomPieceGenerator;
+  score: number;
+  speedIndex: number;
 
-  constructor() {
-    this.gridCanvas = document.getElementById(
-      "grid-canvas",
-    ) as HTMLCanvasElement;
-    this.nextCanvas = document.getElementById(
-      "next-canvas",
-    ) as HTMLCanvasElement;
-    this.scoreContainer = document.getElementById("score-container")!;
-    this.resetButton = document.getElementById("reset-button")!;
-    this.aiButton = document.getElementById("ai-button")!;
-    this.gridContext = this.gridCanvas.getContext("2d")!;
-    this.nextContext = this.nextCanvas.getContext("2d")!;
+  constructor(config: GAConfig) {
+    this.grid = new Grid(22, 10);
+    this.aiActive = true;
+    this.changeSpeed = false;
+    this.speedIndex = 3;
+    this.score = 0;
+    this.lines = 0;
+    this.gamePlayed = 0;
+    this.movePlayed = 0;
+    this.togglePause = false;
+    this.generation = 0;
+    this.config = config;
+    this.currentGenome = -1;
+    this.rng = new RandomPieceGenerator();
+    this.gameConfig = {
+      gamesPerCandidate: 2,
+      maxMovesPerGame: 200,
+    };
+  }
+
+  public Init(): void {
+    const utils = new Genome(this.config);
+    this.candidates = utils.createPopulation();
+    this.evaluateNextGenome();
+
+    this.updateScore();
     document.addEventListener("keydown", this.onKeyDown.bind(this));
 
-    this.grid = new Grid(22, 10);
-    this.rng = new RandomPieceGenerator();
-    this.ai = new AI({
-      heightWeight: -0.4790820241086245,
-      linesWeight: 0.3964888767434276,
-      holesWeight: -0.7460483825589502,
-      bumpinessWeight: -0.23809408996422596,
-    });
-    this.workingPieces = [null, this.rng.nextPiece()];
-    this.workingPiece = null;
-    this.isAIActive = true;
-    this.isKeyEnabled = true;
-    this.gravityTimer = new Timer(this.onGravityTimerTick.bind(this), 500);
-    this.score = 0;
-    this.workingPieceDropAnimationStopwatch = null;
-
-    this.aiButton.onclick = this.toggleAI.bind(this);
-    this.resetButton.onclick = this.resetGame.bind(this);
-
-    this.aiButton.style.backgroundColor = "#E9E9FF";
-    this.startTurn();
-  }
-
-  private intToRGB(i: number): string {
-    return `rgb(${(i >> 16) & 0xff}, ${(i >> 8) & 0xff}, ${i & 0xff})`;
-  }
-
-  private redrawGridCanvas(workingPiecesVerticalOffset: number = 0): void {
-    this.gridContext.save();
-    this.gridContext.clearRect(
-      0,
-      0,
-      this.gridCanvas.width,
-      this.gridCanvas.height,
+    this.gameInterval = setInterval(
+      () => this.loop(),
+      gameSpeed[this.speedIndex],
     );
-
-    for (let row = 2; row < this.grid.rows; row++) {
-      for (let col = 0; col < this.grid.columns; col++) {
-        if (this.grid.cells[row][col] !== 0) {
-          this.gridContext.fillStyle = this.intToRGB(this.grid.cells[row][col]);
-          this.gridContext.fillRect(20 * col, 20 * (row - 2), 20, 20);
-          this.gridContext.strokeStyle = "#FFFFFF";
-          this.gridContext.strokeRect(20 * col, 20 * (row - 2), 20, 20);
-        }
-      }
-    }
-
-    if (this.workingPiece) {
-      for (let row = 0; row < this.workingPiece.dimension; row++) {
-        for (let col = 0; col < this.workingPiece.dimension; col++) {
-          if (this.grid.cells[row][col] !== 0) {
-            this.gridContext.fillStyle = this.intToRGB(
-              this.grid.cells[row][col],
-            );
-            this.gridContext.fillRect(
-              20 * (col + this.workingPiece.dimension),
-              20 * (row + this.workingPiece.dimension - 2) +
-                workingPiecesVerticalOffset,
-              20,
-              20,
-            );
-            this.gridContext.strokeStyle = "#FFFFFF";
-            this.gridContext.strokeRect(
-              20 * (col + this.workingPiece.dimension),
-              20 * (row + this.workingPiece.dimension - 2) +
-                workingPiecesVerticalOffset,
-              20,
-              20,
-            );
-          }
-        }
-      }
-    }
-
-    this.gridContext.restore();
   }
 
-  private redrawNextCanvas(): void {
-    this.nextContext.save();
-    this.nextContext.clearRect(
-      0,
-      0,
-      this.nextCanvas.width,
-      this.nextCanvas.height,
-    );
+  public loop(): void {
+    console.log("Hey");
 
-    const next = this.workingPieces[1];
-    if (next) {
-      const xOffset =
-        next.dimension === 2
-          ? 20
-          : next.dimension === 3
-            ? 10
-            : next.dimension === 4
-              ? 0
-              : null;
-      const yOffset =
-        next.dimension === 2
-          ? 20
-          : next.dimension === 3
-            ? 20
-            : next.dimension === 4
-              ? 10
-              : null;
-
-      for (let r = 0; r < next.dimension; r++) {
-        for (let c = 0; c < next.dimension; c++) {
-          if (next.cells[r][c] !== 0) {
-            this.nextContext.fillStyle = this.intToRGB(next.cells[r][c]);
-            this.nextContext.fillRect(
-              xOffset! + 20 * c,
-              yOffset! + 20 * r,
-              20,
-              20,
-            );
-            this.nextContext.strokeStyle = "#FFFFFF";
-            this.nextContext.strokeRect(
-              xOffset! + 20 * c,
-              yOffset! + 20 * r,
-              20,
-              20,
-            );
-          }
-        }
-      }
-    }
-
-    this.nextContext.restore();
-  }
-
-  private updateScoreContainer(): void {
-    this.scoreContainer.innerHTML = this.score.toString();
-  }
-
-  private startWorkingPieceDropAnimation(
-    callback: () => void = () => {},
-  ): void {
-    let animationHeight = 0;
-    let _workingPiece = this.workingPiece!.clone();
-
-    while (_workingPiece.moveDown(this.grid)) animationHeight++;
-
-    const stopwatch = new Stopwatch((elapsed: number) => {
-      if (elapsed >= animationHeight * 20) {
-        stopwatch.stop();
-        this.redrawGridCanvas(20 * animationHeight);
-        callback();
-        return;
-      }
-
-      this.redrawGridCanvas(20 * (elapsed / 20));
-    });
-
-    this.workingPieceDropAnimationStopwatch = stopwatch;
-  }
-
-  private cancelWorkingPieceDropAnimation(): void {
-    if (this.workingPieceDropAnimationStopwatch === null) return;
-
-    this.workingPieceDropAnimationStopwatch.stop();
-    this.workingPieceDropAnimationStopwatch = null;
-  }
-
-  private startTurn(): void {
-    this.workingPieces.shift();
-    this.workingPieces.push(this.rng.nextPiece());
-    this.workingPiece = this.workingPieces[0];
-
-    this.redrawGridCanvas();
-    this.redrawNextCanvas();
-
-    if (this.isAIActive) {
-      this.isKeyEnabled = false;
-      this.workingPiece = this.ai.best(
-        this.grid,
-        this.workingPieces as Piece[],
+    if (this.changeSpeed) {
+      clearInterval(this.gameInterval);
+      this.gameInterval = setInterval(
+        () => this.loop(),
+        gameSpeed[this.speedIndex],
       );
-      this.startWorkingPieceDropAnimation(() => {
-        while (this.workingPiece!.moveDown(this.grid));
+      this.changeSpeed = false;
+      this.updateScore();
+    }
 
-        if (!this.endTurn()) {
-          alert("Game Over!");
-          return;
+    this.update();
+  }
+
+  public drawGrid() {
+    const output = document.getElementById("grid")!;
+    let html = "<pre>const grid = [";
+    const space =
+      "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+    const grid = this.grid;
+
+    for (let i = 2; i < grid.rows; i++) {
+      let rowHtml = "";
+      const cells = grid.cells[i];
+      for (let j = 0; j < cells.length; j++) {
+        const cellValue = cells[j];
+        rowHtml += `<span style="color: ${colors[cellValue]}">${cellValue > 0 ? " " : "  "}</span>`;
+      }
+      if (i === 2) {
+        html += `[${rowHtml}]`;
+      } else {
+        html += `<br />${space}[${rowHtml}]`;
+      }
+    }
+    html += "]</pre>";
+
+    output.innerHTML = html;
+  }
+
+  public updateScore(): void {
+    const scoreDetails = document.getElementById("score")!;
+    const genomeDetails = document.getElementById("genome")!;
+    const space = "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp";
+    let scoreHTML =
+      "<br /><br /><h2>&nbsp;</h2><h2>Score: " + this.score + "</h2>";
+    scoreHTML += "<br /><b>--Upcoming Shape--</b></br><pre>";
+
+    const upcomingShape = this.pieces[1].cells;
+    for (let i = 0; i < upcomingShape.length; i++) {
+      let rowHTML = "";
+      const cells = upcomingShape[i];
+
+      for (let j = 0; j < cells.length; j++) {
+        const cellValue = cells[j];
+        rowHTML += `<span style="color: ${colors[cellValue]}">${cellValue > 0 ? " " : "  "}</span>`;
+      }
+
+      scoreHTML += space + rowHTML + "<br/>";
+    }
+
+    for (let i = 0; i < 4 - upcomingShape.length; i++) {
+      scoreHTML += "<br/>";
+    }
+
+    scoreHTML += "</pre>";
+
+    let genomeHTML = `<br/>Drop time: ${gameSpeed[this.speedIndex]}ms`;
+    if (this.aiActive) {
+      genomeHTML += `<br/>Game: ${this.gamePlayed + 1}/${this.gameConfig.gamesPerCandidate}`;
+      genomeHTML += `<br/>Moves: ${this.movePlayed}/${this.gameConfig.maxMovesPerGame}`;
+      genomeHTML += `<br/>Lines cleared: ${this.lines}`;
+      genomeHTML += `<br/>Generation: ${this.generation}/${this.config.generations}`;
+      genomeHTML += `<br/>Individual: ${this.currentGenome + 1}/${this.config.populationSize}`;
+      genomeHTML += `<br/><pre style="font-size: 12px">${JSON.stringify(this.candidates[this.currentGenome], null, 2)}</pre>`;
+    }
+
+    scoreDetails.innerHTML = scoreHTML;
+    genomeDetails.innerHTML = genomeHTML;
+  }
+
+  public update(): void {
+    const result = this.movePieceDown();
+    this.drawGrid();
+
+    if (!result) {
+      const { maxMovesPerGame } = this.gameConfig;
+      this.grid.addPiece(this.movingPiece);
+
+      const clearedLines = this.grid.clearedLines();
+      this.score += tetrisScore[clearedLines];
+      this.lines += clearedLines;
+
+      const gameEnd =
+        this.grid.hasExceededTop() ||
+        (this.aiActive && this.movePlayed >= maxMovesPerGame);
+
+      if (gameEnd) {
+        if (this.aiActive) {
+          this.gamePlayed++;
+          this.candidates[this.currentGenome].fitness += this.lines;
         }
 
-        this.startTurn();
-      });
+        this.grid.resetGrid();
+        this.movePlayed = 0;
+        this.lines = 0;
+        this.score = 0;
+      }
+
+      this.updateScore();
+      this.makeNextMove();
+    }
+  }
+
+  private makeNextMove(): void {
+    const { gamesPerCandidate } = this.gameConfig;
+    this.movePlayed++;
+
+    if (this.gamePlayed >= gamesPerCandidate) {
+      this.evaluateNextGenome();
     } else {
-      this.isKeyEnabled = true;
-      this.gravityTimer.resetForward(500);
+      this.pieces.shift();
+      this.pieces.push(this.rng.nextPiece());
+
+      if (this.aiActive) {
+        this.movingPiece = this.ai.bestMove(this.grid, this.pieces)!;
+      } else {
+        this.movingPiece = this.pieces[0];
+      }
+
+      this.grid.addPiece(this.movingPiece);
+      this.drawGrid();
+      this.updateScore();
     }
   }
 
-  private endTurn(): boolean {
-    this.grid.addPiece(this.workingPiece!);
-    this.score += this.grid.clearedLines();
-    this.redrawGridCanvas();
-    this.updateScoreContainer();
+  private evolve(config: GAConfig): void {
+    const utils = new Genome(config);
+    const newCandidates: Candidate[] = [];
 
-    return !this.grid.hasExceededTop();
-  }
-
-  private onGravityTimerTick(): void {
-    if (this.workingPiece!.canMoveDown(this.grid)) {
-      this.workingPiece!.moveDown(this.grid);
-      this.redrawGridCanvas();
-      return;
+    utils.sortCandidates(this.candidates);
+    const newCandidateSize = Math.floor(
+      config.deletionRate * config.populationSize,
+    );
+    const selectionSize = Math.max(
+      Math.floor(config.selectionSize * config.populationSize),
+      2,
+    );
+    console.log(newCandidateSize, selectionSize);
+    for (let i = 0; i < newCandidateSize; i++) {
+      const [parent1, parent2] = utils.tournamentSelection(
+        this.candidates,
+        selectionSize,
+      );
+      console.log(parent1, parent2);
+      const child = utils.crossover(parent1, parent2);
+      utils.mutate(child);
+      utils.normalize(child);
+      newCandidates.push(child);
     }
 
-    this.gravityTimer.stop();
-
-    if (!this.endTurn()) {
-      this.isKeyEnabled = false;
-      alert("Game Over!");
-      return;
-    }
-
-    this.startTurn();
+    utils.deleteNWeakest(this.candidates, newCandidates);
+    this.currentGenome = config.populationSize - newCandidates.length - 1;
   }
 
-  private onKeyDown(event: KeyboardEvent): void {
-    if (!this.isKeyEnabled) return;
+  private evaluateNextGenome(): void {
+    this.currentGenome++;
+
+    if (this.currentGenome >= this.config.populationSize) {
+      this.evolve(this.config);
+      this.generation++;
+    }
+
+    this.ai = new AI(this.candidates[this.currentGenome]);
+    this.gamePlayed = 0;
+    this.rng = new RandomPieceGenerator();
+    this.pieces = [this.rng.nextPiece(), this.rng.nextPiece()];
+    this.makeNextMove();
+  }
+
+  private movePieceDown(): boolean {
+    this.grid.removePiece(this.movingPiece);
+    const result = this.movingPiece.moveDown(this.grid);
+    this.grid.addPiece(this.movingPiece);
+
+    return result;
+  }
+
+  private movePieceRight(): void {
+    this.grid.removePiece(this.movingPiece);
+    this.movingPiece.moveRight(this.grid);
+    this.grid.addPiece(this.movingPiece);
+  }
+
+  private movePieceLeft(): void {
+    this.grid.removePiece(this.movingPiece);
+    this.movingPiece.moveLeft(this.grid);
+    this.grid.addPiece(this.movingPiece);
+  }
+
+  private rotatePiece(): void {
+    this.grid.removePiece(this.movingPiece);
+    this.movingPiece.rotate(this.grid);
+    this.grid.addPiece(this.movingPiece);
+  }
+
+  private reset(): void {
+    this.grid.resetGrid();
+    this.score = 0;
+    this.movePlayed = 0;
+    this.pieces = [this.rng.nextPiece(), this.rng.nextPiece()];
+    this.makeNextMove();
+    this.update();
+    this.updateScore();
+  }
+
+  private pause(): void {
+    this.togglePause = !this.togglePause;
+
+    if (this.togglePause) {
+      clearInterval(this.gameInterval);
+    } else {
+      this.gameInterval = setInterval(
+        () => this.loop(),
+        gameSpeed[this.speedIndex],
+      );
+    }
+  }
+
+  // TODO: handle key events
+  private onKeyDown(event: KeyboardEvent) {
+    const speedLength = gameSpeed.length;
 
     switch (event.key) {
-      case " ": // Space
-        this.isKeyEnabled = false;
-        this.gravityTimer.stop();
-        this.startWorkingPieceDropAnimation(() => {
-          while (this.workingPiece!.canMoveDown(this.grid));
-
-          if (!this.endTurn()) {
-            alert("Game Over!");
-            return;
-          }
-
-          this.startTurn();
-        });
+      case " ":
+        if (!this.aiActive) this.rotatePiece();
         break;
       case "ArrowDown":
-        this.gravityTimer.resetForward(500);
+        if (!this.aiActive) this.movePieceDown();
         break;
       case "ArrowLeft":
-        if (this.workingPiece!.canMoveLeft(this.grid)) {
-          this.workingPiece!.moveLeft(this.grid);
-          this.redrawGridCanvas;
-        }
+        if (!this.aiActive) this.movePieceLeft();
         break;
       case "ArrowRight":
-        if (this.workingPiece!.canMoveRight(this.grid)) {
-          this.workingPiece!.moveRight(this.grid);
-          this.redrawGridCanvas;
-        }
+        if (!this.aiActive) this.movePieceRight();
         break;
-      case "ArrowUp":
-        this.workingPiece!.rotate(this.grid);
-        this.redrawGridCanvas();
+      case "R":
+      case "r":
+        this.reset();
+        break;
+      case "P":
+      case "p":
+        this.pause();
+        break;
+      case "-":
+      case "_":
+        this.speedIndex++;
+
+        if (this.speedIndex >= speedLength) this.speedIndex = 0;
+        this.changeSpeed = true;
+        break;
+      case "=":
+      case "+":
+        this.speedIndex--;
+
+        if (this.speedIndex < 0) this.speedIndex = speedLength - 1;
+        this.changeSpeed = true;
+        break;
+      case "A":
+      case "a":
+        this.aiActive = !this.aiActive;
         break;
     }
-  }
 
-  private toggleAI(): void {
-    this.isAIActive = !this.isAIActive;
-    this.aiButton.style.backgroundColor = this.isAIActive
-      ? "#E9E9FF"
-      : "#FF3232";
-  }
-
-  private resetGame(): void {
-    this.grid = new Grid(22, 10);
-    this.rng = new RandomPieceGenerator();
-    this.score = 0;
-    this.workingPieces = [null, this.rng.nextPiece()];
-    this.workingPiece = null;
-    this.cancelWorkingPieceDropAnimation();
-    this.isAIActive = true;
-    this.isKeyEnabled = true;
-    this.aiButton.style.backgroundColor = "#E9E9FF";
-    this.startTurn();
+    this.drawGrid();
+    this.updateScore();
   }
 }
