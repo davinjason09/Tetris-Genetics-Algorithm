@@ -1,3 +1,5 @@
 {
-  "tailwindConfig": "./tailwind.config.mjs"
+  "tabwidth": 2,
+  "singleQuote": true,
+  "printWidth": 100
 }
