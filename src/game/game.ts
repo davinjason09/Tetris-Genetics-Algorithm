@@ -194,48 +194,19 @@ export class Game {
     }
   }
 
-  private evolve(config: GAConfig): void {
-    const utils = new Genome(config);
-    const newCandidates: Candidate[] = [];
-
-    utils.sortCandidates(this.candidates);
-    const newCandidateSize = Math.floor(
-      config.deletionRate * config.populationSize,
-    );
-    const selectionSize = Math.max(
-      Math.floor(config.selectionSize * config.populationSize),
-      2,
-    );
-    console.log(newCandidateSize, selectionSize);
-    for (let i = 0; i < newCandidateSize; i++) {
-      const [parent1, parent2] = utils.tournamentSelection(
-        this.candidates,
-        selectionSize,
-      );
-      console.log(parent1, parent2);
-      const child = utils.crossover(parent1, parent2);
-      utils.mutate(child);
-      utils.normalize(child);
-      newCandidates.push(child);
-    }
-
-    utils.deleteNWeakest(this.candidates, newCandidates);
-    this.currentGenome = config.populationSize - newCandidates.length - 1;
-  }
-
   private evaluateNextGenome(): void {
     this.currentGenome++;
 
     if (this.currentGenome >= this.config.populationSize) {
-      this.evolve(this.config);
+      const { deletionRate, populationSize } = this.config;
+      this.genomeUtils.evolve(this.candidates);
+      this.currentGenome = populationSize - Math.floor(deletionRate * populationSize);
       this.generation++;
     }
 
     this.ai = new AI(this.candidates[this.currentGenome]);
     this.gamePlayed = 0;
-    this.rng = new RandomPieceGenerator();
-    this.pieces = [this.rng.nextPiece(), this.rng.nextPiece()];
-    this.makeNextMove();
+    this.reset();
   }
 
   private movePieceDown(): boolean {
