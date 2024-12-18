@@ -11,9 +11,9 @@ export enum PieceType {
 }
 
 export class Piece {
-  cells: number[][];
-  row: number;
-  column: number;
+  public cells: number[][];
+  public row: number;
+  public column: number;
 
   constructor(cells: number[][]) {
     this.cells = cells;
