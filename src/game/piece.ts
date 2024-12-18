@@ -1,4 +1,14 @@
-import { Grid } from "./grid";
+import { Grid } from './grid';
+
+export enum PieceType {
+  O = 0,
+  J,
+  L,
+  Z,
+  S,
+  T,
+  I,
+}
 
 export class Piece {
   cells: number[][];
@@ -11,51 +21,51 @@ export class Piece {
     this.column = 0;
   }
 
-  static fromIndex(index: number): Piece {
+  static fromIndex(index: PieceType, grid: Grid): Piece {
     let piece: Piece;
     switch (index) {
-      case 0: // O piece
+      case PieceType.O:
         piece = new Piece([
           [1, 1],
           [1, 1],
         ]);
         break;
-      case 1: // J piece
+      case PieceType.J:
         piece = new Piece([
           [2, 0, 0],
           [2, 2, 2],
           [0, 0, 0],
         ]);
         break;
-      case 2: // L piece
+      case PieceType.L:
         piece = new Piece([
           [0, 0, 3],
           [3, 3, 3],
           [0, 0, 0],
         ]);
         break;
-      case 3: // Z piece
+      case PieceType.Z:
         piece = new Piece([
           [4, 4, 0],
           [0, 4, 4],
           [0, 0, 0],
         ]);
         break;
-      case 4: // S piece
+      case PieceType.S:
         piece = new Piece([
           [0, 5, 5],
           [5, 5, 0],
           [0, 0, 0],
         ]);
         break;
-      case 5: // T piece
+      case PieceType.T:
         piece = new Piece([
           [0, 6, 0],
           [6, 6, 6],
           [0, 0, 0],
         ]);
         break;
-      case 6: // I piece
+      case PieceType.I:
         piece = new Piece([
           [0, 0, 0, 0],
           [7, 7, 7, 7],
@@ -64,10 +74,10 @@ export class Piece {
         ]);
         break;
       default:
-        throw new Error("Invalid piece index");
+        throw new Error('Invalid piece index');
     }
     piece.row = 0;
-    piece.column = Math.floor((10 - piece.cells[0].length) / 2); // Center piece
+    piece.column = Math.floor((grid.columns - piece.cells[0].length) / 2); // Center piece
     return piece;
   }
 

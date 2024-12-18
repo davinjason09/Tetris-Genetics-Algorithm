@@ -1,16 +1,25 @@
-import { Piece } from './piece';
+import { Grid } from './grid';
+import { Piece, PieceType } from './piece';
 
 export class RandomPieceGenerator {
-  private bag: number[];
+  private bag: PieceType[];
   private index: number;
 
   constructor() {
-    this.bag = [0, 1, 2, 3, 4, 5, 6];
+    this.bag = [
+      PieceType.O,
+      PieceType.J,
+      PieceType.L,
+      PieceType.Z,
+      PieceType.S,
+      PieceType.T,
+      PieceType.I,
+    ];
     this.shuffleBag();
     this.index = -1;
   }
 
-  public nextPiece(): Piece {
+  public nextPiece(grid: Grid): Piece {
     this.index++;
 
     if (this.index >= this.bag.length) {
@@ -18,7 +27,7 @@ export class RandomPieceGenerator {
       this.shuffleBag();
     }
 
-    return Piece.fromIndex(this.bag[this.index]);
+    return Piece.fromIndex(this.bag[this.index], grid);
   }
 
   private shuffleBag(): void {
