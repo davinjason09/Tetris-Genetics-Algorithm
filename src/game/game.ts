@@ -97,44 +97,46 @@ export class Game {
   }
 
   public updateScore(): void {
-    const scoreDetails = document.getElementById("score")!;
-    const genomeDetails = document.getElementById("genome")!;
-    const space = "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp";
-    let scoreHTML =
-      "<br /><br /><h2>&nbsp;</h2><h2>Score: " + this.score + "</h2>";
-    scoreHTML += "<br /><b>--Upcoming Shape--</b></br><pre>";
+    const scoreDetails = document.getElementById('score')!;
+    const genomeDetails = document.getElementById('genome')!;
+    const space = '&nbsp;'.repeat(7);
+    let scoreHTML = `<br /><br /><h2>&nbsp;</h2><h2>Score: ${this.score}</h2>`;
 
+    scoreHTML += '<br /><b>--Upcoming Shape--</b></br><pre>';
     const upcomingShape = this.pieces[1].cells;
-    for (let i = 0; i < upcomingShape.length; i++) {
-      let rowHTML = "";
-      const cells = upcomingShape[i];
 
-      for (let j = 0; j < cells.length; j++) {
-        const cellValue = cells[j];
-        rowHTML += `<span style="color: ${colors[cellValue]}">${cellValue > 0 ? " " : "  "}</span>`;
-      }
-
-      scoreHTML += space + rowHTML + "<br/>";
+    for (const row of upcomingShape) {
+      scoreHTML +=
+        space +
+        row
+          .map((value) => `<span style="color: ${colors[value]}">${value ? ' ' : '  '}</span>`)
+          .join('') +
+        '<br/>';
     }
 
     for (let i = 0; i < 4 - upcomingShape.length; i++) {
-      scoreHTML += "<br/>";
+      scoreHTML += '<br/>';
     }
 
-    scoreHTML += "</pre>";
+    scoreHTML += '</pre>';
 
-    let genomeHTML = `<br/>Drop time: ${gameSpeed[this.speedIndex]}ms`;
+    genomeDetails.innerHTML = `Drop time: ${gameSpeed[this.speedIndex]}ms<br/>`;
     if (this.aiActive) {
-      genomeHTML += `<br/>Game: ${this.gamePlayed + 1}/${this.gameConfig.gamesPerCandidate}`;
-      genomeHTML += `<br/>Moves: ${this.movePlayed}/${this.gameConfig.maxMovesPerGame}`;
-      genomeHTML += `<br/>Lines cleared: ${this.lines}`;
-      genomeHTML += `<br/>Generation: ${this.generation}/${this.config.generations}`;
-      genomeHTML += `<br/>Individual: ${this.currentGenome + 1}/${this.config.populationSize}`;
-      genomeHTML += `<br/><pre style="font-size: 12px">${JSON.stringify(this.candidates[this.currentGenome], null, 2)}</pre>`;
+      const candidate = this.candidates[this.currentGenome];
+      const bestGenome = this.candidates[0];
+
+      genomeDetails.innerHTML += `
+      Game: ${this.gamePlayed + 1}/${this.gameConfig.gamesPerCandidate}<br/>
+      Moves: ${this.movePlayed}/${this.gameConfig.maxMovesPerGame}<br/>
+      Lines cleared: ${this.lines}<br/>
+      Generation: ${this.generation}/${this.config.generations}<br/>
+      Individual: ${this.currentGenome + 1}/${this.config.populationSize}<br/>
+      Current Genome:<pre style="font-size: 0.75rem">${JSON.stringify(candidate, null, 2)}</pre>
+      ${this.generation ? `Best Genome:<pre style="font-size: 0.75rem">${JSON.stringify(bestGenome, null, 2)}</pre>` : ''}
+    `;
     }
 
     scoreDetails.innerHTML = scoreHTML;
-    genomeDetails.innerHTML = genomeHTML;
   }
 
   public update(): void {
