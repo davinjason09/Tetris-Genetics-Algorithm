@@ -218,20 +218,20 @@ export class Game {
   }
 
   private movePieceRight(): void {
-    this.grid.removePiece(this.movingPiece);
-    this.movingPiece.moveRight(this.grid);
-    this.grid.addPiece(this.movingPiece);
+    this.movePiece(() => this.movingPiece.moveRight(this.grid));
   }
 
   private movePieceLeft(): void {
-    this.grid.removePiece(this.movingPiece);
-    this.movingPiece.moveLeft(this.grid);
-    this.grid.addPiece(this.movingPiece);
+    this.movePiece(() => this.movingPiece.moveLeft(this.grid));
   }
 
   private rotatePiece(): void {
+    this.movePiece(() => this.movingPiece.rotate(this.grid));
+  }
+
+  private movePiece(action: () => void): void {
     this.grid.removePiece(this.movingPiece);
-    this.movingPiece.rotate(this.grid);
+    action();
     this.grid.addPiece(this.movingPiece);
   }
 
