@@ -29,18 +29,18 @@ export class AI {
     );
   }
 
-  private findBestPlacement(
+  private findOptimalPlacement(
     grid: Grid,
     workingPieces: Piece[],
-    workingPieceIndex: number,
-  ): { piece: Piece | null; score: number | null } {
-    if (workingPieceIndex < 0 || workingPieceIndex >= workingPieces.length) {
-      throw new Error("Invalid working piece index");
+    pieceIndex: number,
+  ): { piece: Piece | null; score: number } {
+    if (pieceIndex >= workingPieces.length) {
+      return { piece: null, score: this.evaluateGrid(grid) };
     }
 
-    const currentPiece = workingPieces[workingPieceIndex];
+    const currentPiece = workingPieces[pieceIndex];
     let bestPiece: Piece | null = null;
-    let bestScore: number | null = null;
+    let bestScore = -Infinity;
 
     for (let rotation = 0; rotation < 4; rotation++) {
       const rotatedPiece = currentPiece.clone();
@@ -49,35 +49,25 @@ export class AI {
         rotatedPiece.rotate(grid);
       }
 
-      // Move piece to the leftmost position
       while (rotatedPiece.moveLeft(grid));
 
-      while (grid.valid(rotatedPiece)) {
+      while (grid.isValidMove(rotatedPiece)) {
         const piecePlacement = rotatedPiece.clone();
 
-        // Move piece down as far as possible
         while (piecePlacement.moveDown(grid));
 
-        const simulatedGrid = grid.cloneGrid();
-        simulatedGrid.addPiece(piecePlacement);
+        const simulationGrid = grid.cloneGrid();
+        simulationGrid.addPiece(piecePlacement);
+        const score =
+          pieceIndex === workingPieces.length - 1
+            ? this.evaluateGrid(simulationGrid)
+            : this.findOptimalPlacement(simulationGrid, workingPieces, pieceIndex + 1).score;
 
-        let score: number | null = null;
-        if (workingPieceIndex === workingPieces.length - 1) {
-          score = this.evaluateGrid(simulatedGrid);
-        } else {
-          score = this.findBestPlacement(
-            simulatedGrid,
-            workingPieces,
-            workingPieceIndex + 1,
-          ).score;
-        }
-
-        if (score! > bestScore! || bestScore === null) {
+        if (score > bestScore) {
           bestScore = score;
           bestPiece = rotatedPiece.clone();
         }
 
-        // Move piece to the right
         rotatedPiece.column++;
       }
     }
@@ -86,7 +76,7 @@ export class AI {
   }
 
   public bestMove(grid: Grid, workingPieces: Piece[]): Piece | null {
-    const result = this.findBestPlacement(grid, workingPieces, 0);
+    const result = this.findOptimalPlacement(grid, workingPieces, 0);
     return result.piece;
   }
 }
