@@ -138,7 +138,7 @@ export class Piece {
     const originalCells = this.cells.map((row) => [...row]);
     this.cells = this.transposeAndReverse(this.cells);
 
-    if (!grid.valid(this)) {
+    if (!grid.isValidMove(this)) {
       this.cells = originalCells;
       return false;
     }

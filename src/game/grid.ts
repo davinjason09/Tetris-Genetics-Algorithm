@@ -69,15 +69,14 @@ export class Grid {
     }
   }
 
-  public valid(piece: Piece): boolean {
+  public isValidMove(piece: Piece): boolean {
     for (let row = 0; row < piece.cells.length; row++) {
       for (let col = 0; col < piece.cells[row].length; col++) {
         const _row = piece.row + row;
         const _col = piece.column + col;
 
         if (piece.cells[row][col] != 0) {
-          if (_row < 0 || _row >= this.rows) return false;
-          if (_col < 0 || _col >= this.columns) return false;
+          if (_row < 0 || _row >= this.rows || _col < 0 || _col >= this.columns) return false;
           if (this.cells[_row][_col] != 0) return false;
         }
       }
