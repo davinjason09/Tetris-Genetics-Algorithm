@@ -28,18 +28,23 @@ export class Grid {
     return !this.isRowEmpty(0) || !this.isRowEmpty(1);
   }
 
-  public clearedLines(): number {
+  public clearCompleteLines(): number {
+    const newCells: number[][] = [];
     let linesCleared = 0;
 
-    for (let row = this.rows - 1; row >= 0; row--) {
+    for (let row = 0; row < this.rows; row++) {
       if (this.isFullLines(row)) {
         linesCleared++;
-        this.clearRow(row);
-      } else if (linesCleared > 0) {
-        this.moveRowDown(row, linesCleared);
+      } else {
+        newCells.push(this.cells[row]);
       }
     }
 
+    while (newCells.length < this.rows) {
+      newCells.unshift(Array(this.columns).fill(0));
+    }
+
+    this.cells = newCells;
     return linesCleared;
   }
 
@@ -85,7 +90,6 @@ export class Grid {
     return true;
   }
 
-  // Helper functions
   private isFullLines(row: number): boolean {
     return this.cells[row].every((cell) => cell !== 0);
   }
@@ -94,60 +98,37 @@ export class Grid {
     return this.cells[row].every((cell) => cell === 0);
   }
 
-  private getColumnHeight(column: number): number {
-    let row = 0;
-    while (row < this.rows && this.cells[row][column] === 0) row++;
-    return this.rows - row;
+  private getColumnHeight(): number[] {
+    return Array.from(
+      { length: this.columns },
+      (_, col) => this.rows - this.cells.findIndex((row) => row[col] !== 0),
+    ).map((height) => (height - 1 === this.rows ? 0 : height));
   }
 
-  private clearRow(row: number): void {
-    this.cells[row].fill(0);
-  }
-
-  private moveRowDown(row: number, distance: number): void {
-    this.cells[row + distance] = [...this.cells[row]];
-    this.cells[row].fill(0);
-  }
-
-  // Heuristic
   public calculateAggregateHeight(): number {
-    let totalHeight = 0;
-
-    for (let column = 0; column < this.columns; column++) {
-      totalHeight += this.getColumnHeight(column);
-    }
-
-    return totalHeight;
+    return this.getColumnHeight().reduce((acc, height) => acc + height, 0);
   }
 
   public calculateCompleteLines(): number {
-    let completeLines = 0;
-
-    for (let row = 0; row < this.rows; row++) {
-      if (this.isFullLines(row)) completeLines++;
-    }
-
-    return completeLines;
+    return this.cells.filter((row) => this.isFullLines(this.cells.indexOf(row))).length;
   }
 
   public calculateBumpiness(): number {
-    let totalBumpiness = 0;
-    for (let column = 0; column < this.columns - 1; column++) {
-      totalBumpiness += Math.abs(
-        this.getColumnHeight(column) - this.getColumnHeight(column + 1),
-      );
-    }
-    return totalBumpiness;
+    const heights = this.getColumnHeight();
+    return heights.reduce(
+      (acc, height, index) =>
+        acc + (index < heights.length - 1 ? Math.abs(height - heights[index + 1]) : 0),
+      0,
+    );
   }
 
   public calculateHoles(): number {
     let totalHoles = 0;
+    const heights = this.getColumnHeight();
 
-    for (let column = 0; column < this.columns; column++) {
-      let isBlock = false;
-      for (let row = 0; row < this.rows; row++) {
-        if (this.cells[row][column] !== 0) isBlock = true;
-        else if (this.cells[row][column] === 0 && isBlock) totalHoles++;
+    for (let col = 0; col < this.columns; col++) {
+      for (let row = this.rows - heights[col]; row < this.rows; row++) {
+        if (this.cells[row][col] === 0) totalHoles++;
       }
     }
 
