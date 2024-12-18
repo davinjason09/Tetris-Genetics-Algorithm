@@ -1,9 +1,9 @@
-import { Piece } from "./piece";
+import { Piece } from './piece';
 
 export class Grid {
-  rows: number;
-  columns: number;
-  cells: number[][];
+  public rows: number;
+  public columns: number;
+  public cells: number[][];
 
   constructor(rows: number, columns: number) {
     this.rows = rows;
@@ -11,7 +11,6 @@ export class Grid {
     this.cells = Array.from({ length: rows }, () => Array(columns).fill(0));
   }
 
-  // Grid manipulation
   public cloneGrid(): Grid {
     const clonedGrid = new Grid(this.rows, this.columns);
     clonedGrid.cells = this.cells.map((row) => row.slice());
@@ -19,9 +18,7 @@ export class Grid {
   }
 
   public resetGrid(): void {
-    this.cells = Array.from({ length: this.rows }, () =>
-      Array(this.columns).fill(0),
-    );
+    this.cells = Array.from({ length: this.rows }, () => Array(this.columns).fill(0));
   }
 
   public hasExceededTop(): boolean {

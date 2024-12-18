@@ -1,4 +1,4 @@
-import { Candidate, GAConfig } from "../constant/Types";
+import { Candidate, GAConfig } from '@/constant/Types';
 
 export class Genome {
   private config: GAConfig;
