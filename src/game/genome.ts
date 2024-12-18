@@ -41,8 +41,8 @@ export class Genome {
   }
 
   public createPopulation(): Candidate[] {
-    const candidates: Candidate[] = [];
-    const size = this.config.populationSize;
+    return Array.from({ length: this.config.populationSize }, () => this.generateRandomCandidate());
+  }
 
     for (let i = 0; i < size; i++) {
       candidates.push(this.generateRandomCandidate());
@@ -55,30 +55,18 @@ export class Genome {
     candidates.sort((a, b) => b.fitness - a.fitness);
   }
 
-  public tournamentSelection(
-    candidates: Candidate[],
-    k: number,
-  ): [Candidate, Candidate] {
-    const indices = Array.from(candidates.keys());
-
-    let fittestIndex1: number | null = null;
-    let fittestIndex2: number | null = null;
+  private tournamentSelection(candidates: Candidate[], k: number): [Candidate, Candidate] {
+    const selected: Candidate[] = new Array(k);
 
     for (let i = 0; i < k; i++) {
-      const idx = indices.splice(this.randomInteger(0, indices.length), 1)[0];
-
-      if (fittestIndex1 === null || idx < fittestIndex1) {
-        fittestIndex2 = fittestIndex1;
-        fittestIndex1 = idx;
-      } else if (fittestIndex2 === null || idx < fittestIndex2) {
-        fittestIndex2 = idx;
-      }
+      selected[i] = candidates[this.randomInteger(0, candidates.length)];
     }
 
-    return [candidates[fittestIndex1!], candidates[fittestIndex2!]];
+    selected.sort((a, b) => b.fitness! - a.fitness!);
+    return [selected[0], selected[1]];
   }
 
-  public crossover(parent1: Candidate, parent2: Candidate): Candidate {
+  private crossover(parent1: Candidate, parent2: Candidate): Candidate {
     const CROSSOVER_BIAS = 1; // prevent multiplicaiton by 0
     const child = {
       heightWeight:
@@ -96,27 +84,20 @@ export class Genome {
       fitness: 0,
     };
 
-    this.normalize(child);
-    return child;
+    return this.normalize(child);
   }
 
-  public mutate(candidate: Candidate): void {
-    const mutationRate = this.config.mutationRate;
-    const mutationStep = this.config.mutationStep;
-    const quantity = Math.random() * (mutationStep * 2) - mutationStep;
+  private mutate(candidate: Candidate): void {
+    const { mutationRate, mutationStep } = this.config;
 
-    if (Math.random() < mutationRate) {
-      candidate.heightWeight += quantity;
-    }
-    if (Math.random() < mutationRate) {
-      candidate.linesWeight += quantity;
-    }
-    if (Math.random() < mutationRate) {
-      candidate.holesWeight += quantity;
-    }
-    if (Math.random() < mutationRate) {
-      candidate.bumpinessWeight += quantity;
-    }
+    const mutateValue = () => Math.random() * (mutationStep * 2) - mutationStep;
+
+    if (Math.random() < mutationRate) candidate.heightWeight += mutateValue();
+    if (Math.random() < mutationRate) candidate.linesWeight += mutateValue();
+    if (Math.random() < mutationRate) candidate.holesWeight += mutateValue();
+    if (Math.random() < mutationRate) candidate.bumpinessWeight += mutateValue();
+
+    this.normalize(candidate);
   }
 
   public deleteNWeakest(
