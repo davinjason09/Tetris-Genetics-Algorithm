@@ -44,10 +44,21 @@ export class Genome {
     return Array.from({ length: this.config.populationSize }, () => this.generateRandomCandidate());
   }
 
-    for (let i = 0; i < size; i++) {
-      candidates.push(this.generateRandomCandidate());
+  public evolve(candidates: Candidate[]): Candidate[] {
+    const { deletionRate, selectionSize, populationSize } = this.config;
+    const newCandidateSize = Math.floor(deletionRate * populationSize);
+    const selectionPoolSize = Math.max(Math.floor(selectionSize * populationSize), 2);
+
+    const newCandidates: Candidate[] = new Array(newCandidateSize);
+    this.sortCandidates(candidates);
+    for (let i = 0; i < newCandidateSize; i++) {
+      const [parent1, parent2] = this.tournamentSelection(candidates, selectionPoolSize);
+      const child = this.crossover(parent1, parent2);
+      this.mutate(child);
+      newCandidates[i] = child;
     }
 
+    this.replaceWeakest(candidates, newCandidates);
     return candidates;
   }
 
