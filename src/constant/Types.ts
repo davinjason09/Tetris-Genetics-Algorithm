@@ -6,14 +6,6 @@ export type Candidate = {
   fitness: number;
 };
 
-export type TunerConfig = {
-  generations: number;
-  populationSize: number;
-  mutationRate: number;
-  mutationStep: number;
-  patience: number;
-};
-
 export type GAConfig = {
   generations: number;
   populationSize: number;
