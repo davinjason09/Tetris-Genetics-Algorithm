@@ -258,49 +258,34 @@ export class Game {
     }
   }
 
-  // TODO: handle key events
   private onKeyDown(event: KeyboardEvent) {
     const speedLength = gameSpeed.length;
+    const pressedKey = event.key;
 
-    switch (event.key) {
-      case " ":
-        if (!this.aiActive) this.rotatePiece();
-        break;
-      case "ArrowDown":
-        if (!this.aiActive) this.movePieceDown();
-        break;
-      case "ArrowLeft":
-        if (!this.aiActive) this.movePieceLeft();
-        break;
-      case "ArrowRight":
-        if (!this.aiActive) this.movePieceRight();
-        break;
-      case "R":
-      case "r":
-        this.reset();
-        break;
-      case "P":
-      case "p":
-        this.pause();
-        break;
-      case "-":
-      case "_":
-        this.speedIndex++;
+    if (pressedKey === ' ') {
+      if (!this.aiActive) this.rotatePiece();
+    } else if (pressedKey === 'ArrowDown') {
+      if (!this.aiActive) this.movePieceDown();
+    } else if (pressedKey === 'ArrowLeft') {
+      if (!this.aiActive) this.movePieceLeft();
+    } else if (pressedKey === 'ArrowRight') {
+      if (!this.aiActive) this.movePieceRight();
+    } else if (pressedKey.toLowerCase() === 'r') {
+      this.reset();
+    } else if (pressedKey.toLowerCase() === 'p') {
+      this.pause();
+    } else if (pressedKey.toLowerCase() === 'a') {
+      this.aiActive = !this.aiActive;
+    } else if (pressedKey === '-' || pressedKey === '_') {
+      this.speedIndex++;
 
-        if (this.speedIndex >= speedLength) this.speedIndex = 0;
-        this.changeSpeed = true;
-        break;
-      case "=":
-      case "+":
-        this.speedIndex--;
+      if (this.speedIndex >= speedLength) this.speedIndex = 0;
+      this.changeSpeed = true;
+    } else if (pressedKey === '=' || pressedKey === '+') {
+      this.speedIndex--;
 
-        if (this.speedIndex < 0) this.speedIndex = speedLength - 1;
-        this.changeSpeed = true;
-        break;
-      case "A":
-      case "a":
-        this.aiActive = !this.aiActive;
-        break;
+      if (this.speedIndex < 0) this.speedIndex = speedLength - 1;
+      this.changeSpeed = true;
     }
 
     this.drawGrid();
