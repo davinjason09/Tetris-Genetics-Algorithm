@@ -1,20 +1,14 @@
-import { Grid } from "./grid";
-import { Piece } from "./piece";
-
-interface Weights {
-  heightWeight: number;
-  linesWeight: number;
-  holesWeight: number;
-  bumpinessWeight: number;
-}
+import { Candidate } from '@/constant/Types';
+import { Grid } from './grid';
+import { Piece } from './piece';
 
 export class AI {
-  heightWeight: number;
-  linesWeight: number;
-  holesWeight: number;
-  bumpinessWeight: number;
+  private heightWeight: number;
+  private linesWeight: number;
+  private holesWeight: number;
+  private bumpinessWeight: number;
 
-  constructor(weights: Weights) {
+  constructor(weights: Candidate) {
     this.heightWeight = weights.heightWeight;
     this.linesWeight = weights.linesWeight;
     this.holesWeight = weights.holesWeight;
