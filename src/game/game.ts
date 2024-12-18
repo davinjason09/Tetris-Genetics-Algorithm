@@ -78,26 +78,20 @@ export class Game {
   }
 
   public drawGrid() {
-    const output = document.getElementById("grid")!;
-    let html = "<pre>const grid = [";
-    const space =
-      "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-    const grid = this.grid;
+    const output = document.getElementById('grid')!;
+    let html = '<pre>const grid = [';
+    const space = '&nbsp;'.repeat(14);
+    const grid = this.grid.cells;
 
-    for (let i = 2; i < grid.rows; i++) {
-      let rowHtml = "";
-      const cells = grid.cells[i];
-      for (let j = 0; j < cells.length; j++) {
-        const cellValue = cells[j];
-        rowHtml += `<span style="color: ${colors[cellValue]}">${cellValue > 0 ? " " : "  "}</span>`;
-      }
-      if (i === 2) {
-        html += `[${rowHtml}]`;
-      } else {
-        html += `<br />${space}[${rowHtml}]`;
-      }
+    for (let i = 2; i < this.grid.rows; i++) {
+      const cells = grid[i];
+      let rowHTML = cells
+        .map((value) => `<span style="color: ${colors[value]}">${value ? ' ' : '  '}</span>`)
+        .join('');
+
+      html += i === 2 ? `[${rowHTML}]` : `<br />${space}[${rowHTML}]`;
     }
-    html += "]</pre>";
+    html += ']</pre>';
 
     output.innerHTML = html;
   }
