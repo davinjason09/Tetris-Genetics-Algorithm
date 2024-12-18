@@ -89,45 +89,6 @@ export class Piece {
     return piece;
   }
 
-  private canMoveLeft(grid: Grid): boolean {
-    return this.canMove(grid, 0, -1);
-  }
-
-  private canMoveRight(grid: Grid): boolean {
-    return this.canMove(grid, 0, 1);
-  }
-
-  private canMoveDown(grid: Grid): boolean {
-    return this.canMove(grid, 1, 0);
-  }
-
-  public moveLeft(grid: Grid): boolean {
-    if (this.canMoveLeft(grid)) {
-      this.column--;
-      return true;
-    }
-
-    return false;
-  }
-
-  public moveRight(grid: Grid): boolean {
-    if (this.canMoveRight(grid)) {
-      this.column++;
-      return true;
-    }
-
-    return false;
-  }
-
-  public moveDown(grid: Grid): boolean {
-    if (this.canMoveDown(grid)) {
-      this.row++;
-      return true;
-    }
-
-    return false;
-  }
-
   private canMove(grid: Grid, rowOffset: number, colOffset: number): boolean {
     for (let r = 0; r < this.cells.length; r++) {
       for (let c = 0; c < this.cells[r].length; c++) {
@@ -149,6 +110,28 @@ export class Piece {
       }
     }
     return true;
+  }
+
+  private move(grid: Grid, rowOffset: number, colOffset: number): boolean {
+    if (this.canMove(grid, rowOffset, colOffset)) {
+      this.row += rowOffset;
+      this.column += colOffset;
+      return true;
+    }
+
+    return false;
+  }
+
+  public moveLeft(grid: Grid): boolean {
+    return this.move(grid, 0, -1);
+  }
+
+  public moveRight(grid: Grid): boolean {
+    return this.move(grid, 0, 1);
+  }
+
+  public moveDown(grid: Grid): boolean {
+    return this.move(grid, 1, 0);
   }
 
   public rotate(grid: Grid): boolean {
