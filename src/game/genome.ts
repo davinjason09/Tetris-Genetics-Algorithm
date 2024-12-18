@@ -1,7 +1,7 @@
 import { Candidate, GAConfig } from "../constant/Types";
 
 export class Genome {
-  config: GAConfig;
+  private config: GAConfig;
 
   constructor(config: GAConfig) {
     this.config = config;
@@ -11,7 +11,7 @@ export class Genome {
     return Math.floor(Math.random() * (max - min)) + min;
   }
 
-  public normalize(candidate: Candidate): Candidate {
+  private normalize(candidate: Candidate): Candidate {
     const norm = Math.sqrt(
       candidate.heightWeight ** 2 +
         candidate.linesWeight ** 2 +
@@ -51,7 +51,7 @@ export class Genome {
     return candidates;
   }
 
-  public sortCandidates(candidates: Candidate[]): void {
+  private sortCandidates(candidates: Candidate[]): void {
     candidates.sort((a, b) => b.fitness - a.fitness);
   }
 
@@ -100,14 +100,7 @@ export class Genome {
     this.normalize(candidate);
   }
 
-  public deleteNWeakest(
-    candidates: Candidate[],
-    newCandidates: Candidate[],
-  ): void {
-    candidates.splice(
-      -newCandidates.length,
-      newCandidates.length,
-      ...newCandidates,
-    );
+  private replaceWeakest(candidates: Candidate[], newCandidates: Candidate[]): void {
+    candidates.splice(-newCandidates.length, newCandidates.length, ...newCandidates);
   }
 }
