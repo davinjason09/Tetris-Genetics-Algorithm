@@ -31,17 +31,9 @@ export class RandomPieceGenerator {
   }
 
   private shuffleBag(): void {
-    let currentIndex: number = this.bag.length;
-    let temporaryValue: number;
-    let randomIndex: number;
-
-    while (currentIndex !== 0) {
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex--;
-
-      temporaryValue = this.bag[currentIndex];
-      this.bag[currentIndex] = this.bag[randomIndex];
-      this.bag[randomIndex] = temporaryValue;
+    for (let i = this.bag.length - 1; i > 0; i--) {
+      const randomIndex = Math.floor(Math.random() * (i + 1));
+      [this.bag[i], this.bag[randomIndex]] = [this.bag[randomIndex], this.bag[i]];
     }
   }
 }
