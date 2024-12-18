@@ -139,21 +139,18 @@ export class Game {
     scoreDetails.innerHTML = scoreHTML;
   }
 
-  public update(): void {
+  private update(): void {
     const result = this.movePieceDown();
     this.drawGrid();
 
     if (!result) {
-      const { maxMovesPerGame } = this.gameConfig;
-      this.grid.addPiece(this.movingPiece);
-
-      const clearedLines = this.grid.clearedLines();
+      const clearedLines = this.grid.clearCompleteLines();
       this.score += tetrisScore[clearedLines];
       this.lines += clearedLines;
 
       const gameEnd =
         this.grid.hasExceededTop() ||
-        (this.aiActive && this.movePlayed >= maxMovesPerGame);
+        (this.aiActive && this.movePlayed >= this.gameConfig.maxMovesPerGame);
 
       if (gameEnd) {
         if (this.aiActive) {
@@ -180,7 +177,7 @@ export class Game {
       this.evaluateNextGenome();
     } else {
       this.pieces.shift();
-      this.pieces.push(this.rng.nextPiece());
+      this.pieces.push(this.rng.nextPiece(this.grid));
 
       if (this.aiActive) {
         this.movingPiece = this.ai.bestMove(this.grid, this.pieces)!;
@@ -239,7 +236,7 @@ export class Game {
     this.grid.resetGrid();
     this.score = 0;
     this.movePlayed = 0;
-    this.pieces = [this.rng.nextPiece(), this.rng.nextPiece()];
+    this.pieces = [this.rng.nextPiece(this.grid), this.rng.nextPiece(this.grid)];
     this.makeNextMove();
     this.update();
     this.updateScore();
