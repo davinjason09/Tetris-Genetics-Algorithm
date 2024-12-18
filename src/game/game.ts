@@ -1,46 +1,48 @@
-import { colors, gameSpeed, tetrisScore } from "../constant/Contants";
-import { Candidate, GAConfig, GameConfig } from "../constant/Types";
-import { AI } from "./ai";
-import { Genome } from "./genome";
-import { Grid } from "./grid";
-import { Piece } from "./piece";
-import { RandomPieceGenerator } from "./piece_generator";
+import { Candidate, GAConfig, GameConfig } from '@/constant/Types';
+import { colors, gameSpeed, tetrisScore } from '../constant/Contants';
+import { AI } from './ai';
+import { Genome } from './genome';
+import { Grid } from './grid';
+import { Piece } from './piece';
+import { RandomPieceGenerator } from './piece_generator';
 
-export class Game {
-  ai: AI;
-  aiActive: boolean;
-  candidates: Candidate[];
-  changeSpeed: boolean;
-  config: GAConfig;
-  currentGenome: number;
-  grid: Grid;
-  gameConfig: GameConfig;
-  gameInterval: ReturnType<typeof setInterval>;
-  gamePlayed: number;
-  generation: number;
-  lines: number;
-  movePlayed: number;
-  movingPiece: Piece;
-  togglePause: boolean;
-  pieces: Piece[];
-  rng: RandomPieceGenerator;
-  score: number;
-  speedIndex: number;
+export class TetrisGame {
+  private ai!: AI;
+  private aiActive: boolean;
+  private candidates!: Candidate[];
+  private changeSpeed: boolean;
+  private config: GAConfig;
+  private currentGenome: number;
+  private gameConfig: GameConfig;
+  private gameInterval!: ReturnType<typeof setInterval>;
+  private gamePlayed: number;
+  private generation: number;
+  private genomeUtils: Genome;
+  private grid: Grid;
+  private lines: number;
+  private movePlayed: number;
+  private movingPiece!: Piece;
+  private pieces!: Piece[];
+  private rng: RandomPieceGenerator;
+  private score: number;
+  private speedIndex: number;
+  private togglePause: boolean;
 
   constructor(config: GAConfig) {
-    this.grid = new Grid(22, 10);
     this.aiActive = true;
     this.changeSpeed = false;
-    this.speedIndex = 3;
-    this.score = 0;
-    this.lines = 0;
-    this.gamePlayed = 0;
-    this.movePlayed = 0;
-    this.togglePause = false;
-    this.generation = 0;
     this.config = config;
     this.currentGenome = -1;
+    this.gamePlayed = 0;
+    this.generation = 0;
+    this.genomeUtils = new Genome(config);
+    this.grid = new Grid(22, 10);
+    this.lines = 0;
+    this.movePlayed = 0;
     this.rng = new RandomPieceGenerator();
+    this.score = 0;
+    this.speedIndex = 3;
+    this.togglePause = false;
     this.gameConfig = {
       gamesPerCandidate: 2,
       maxMovesPerGame: 200,
@@ -48,28 +50,19 @@ export class Game {
   }
 
   public Init(): void {
-    const utils = new Genome(this.config);
-    this.candidates = utils.createPopulation();
+    this.candidates = this.genomeUtils.createPopulation();
     this.evaluateNextGenome();
 
     this.updateScore();
-    document.addEventListener("keydown", this.onKeyDown.bind(this));
+    document.addEventListener('keydown', this.onKeyDown.bind(this));
 
-    this.gameInterval = setInterval(
-      () => this.loop(),
-      gameSpeed[this.speedIndex],
-    );
+    this.gameInterval = setInterval(() => this.loop(), gameSpeed[this.speedIndex]);
   }
 
   public loop(): void {
-    console.log("Hey");
-
     if (this.changeSpeed) {
       clearInterval(this.gameInterval);
-      this.gameInterval = setInterval(
-        () => this.loop(),
-        gameSpeed[this.speedIndex],
-      );
+      this.gameInterval = setInterval(() => this.loop(), gameSpeed[this.speedIndex]);
       this.changeSpeed = false;
       this.updateScore();
     }
@@ -248,10 +241,7 @@ export class Game {
     if (this.togglePause) {
       clearInterval(this.gameInterval);
     } else {
-      this.gameInterval = setInterval(
-        () => this.loop(),
-        gameSpeed[this.speedIndex],
-      );
+      this.gameInterval = setInterval(() => this.loop(), gameSpeed[this.speedIndex]);
     }
   }
 
